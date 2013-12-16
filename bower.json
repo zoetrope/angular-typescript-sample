@@ -1,0 +1,36 @@
+{
+  "name": "angular-typescript-sample",
+  "version": "0.0.1",
+  "homepage": "https://github.com/zoetrope/angular-typescript-sample",
+  "authors": [
+    "zoetrope"
+  ],
+  "description": "AngularJS + TypeScript Sample Project",
+  "main": "index.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "jquery": "~2.0.3",
+    "angular": "~1.2.5",
+    "angular-resource": "~1.2.5",
+    "angular-route": "~1.2.5"
+  },
+  "exportsOverride": {
+    "angular": {
+      "scripts/libs": "**/angular.js"
+    },
+    "angular-resource": {
+      "scripts/libs": "**/angular-resource.js"
+    },
+    "angular-route": {
+      "scripts/libs": "angular-route.js"
+    },
+    "jquery": {
+      "scripts/libs": "**/jquery.js"
+    }
+  }
+}
