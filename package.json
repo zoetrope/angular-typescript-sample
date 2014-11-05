@@ -23,7 +23,7 @@
     "karma-chrome-launcher": "^0.1.5",
     "karma-jasmine": "^0.2.3",
     "karma-phantomjs-launcher": "^0.1.4",
-    "karma-typescript-preprocessor": "0.0.9",
+    "karma-typescript-preprocessor": "0.0.8",
     "main-bower-files": "^2.1.0",
     "tsd": "^0.5.7"
   }

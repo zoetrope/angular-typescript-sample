@@ -155,7 +155,7 @@ gulp.task('deploy:rel', ['uglify'], function () {
 
 gulp.task('unittest', function (callback) {
   karma.start({
-    configFile: 'karma.conf.js',
+    configFile: 'test/unit/karma.conf.js',
     singleRun: true
   }, callback);
 });
