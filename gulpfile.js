@@ -160,6 +160,20 @@ gulp.task('unittest', function (callback) {
   }, callback);
 });
 
+var webdriver_update = $.protractor.webdriver_update;
+var webdriver_standalone = $.protractor.webdriver_standalone;
+gulp.task('webdriver:update', webdriver_update);
+gulp.task('webdriver:start', webdriver_standalone);
+
+gulp.task('e2etest', function (callback) {
+  gulp.src(['test/e2e/*.js'])
+    .pipe($.protractor.protractor({
+      configFile: './test/e2e/protractor.conf.js'
+    })).on('error', function (e) {
+      console.log(e)
+    }).on('end', callback);
+});
+
 gulp.task('build:dev', ['copy:static-file', 'deploy:dev']);
 gulp.task('build:rel', ['copy:static-file', 'deploy:rel']);
 
