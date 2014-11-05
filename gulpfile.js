@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var path = require('path');
 var del = require('del');
 var bower = require('bower');
+var karma = require('karma').server;
 
 var $ = require('gulp-load-plugins')({
   pattern: ['gulp-*', 'main-bower-files']
@@ -150,6 +151,13 @@ gulp.task('deploy:rel', ['uglify'], function () {
   return gulp.src(path.join(config.paths.build, config.files.compressed))
     .pipe($.rename(config.files.deployed))
     .pipe(gulp.dest(config.paths.public));
+});
+
+gulp.task('unittest', function (callback) {
+  karma.start({
+    configFile: 'karma.conf.js',
+    singleRun: true
+  }, callback);
 });
 
 gulp.task('build:dev', ['copy:static-file', 'deploy:dev']);
