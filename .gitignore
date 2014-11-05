@@ -1,7 +1,8 @@
 node_modules
 bower_components
-app/d.ts
-dist
+build
+public
+typings
 
 .idea
 *.iml
