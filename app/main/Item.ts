@@ -1,10 +1,10 @@
-module app.models {
-    export class Item {
+module main {
+  export class Item {
 
-        constructor(public content: string) {
-            this.createdAt = new Date;
-        }
-
-        createdAt: Date;
+    constructor(public content:string) {
+      this.createdAt = new Date;
     }
+
+    createdAt:Date;
+  }
 }

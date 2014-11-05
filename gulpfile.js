@@ -16,6 +16,7 @@ var config = {
   },
   file: {
     compiled: 'app-compiled.js',
+    annotated: 'app-annotated.js',
     concatenated: 'app-concatenated.js',
     compressed: 'app-compressed.js',
     deployed: 'app.js'
@@ -71,10 +72,17 @@ gulp.task('copy:lib', function () {
     .pipe(gulp.dest(config.dir.build_libs));
 });
 
-gulp.task('concat', ['tsc', 'copy:lib'], function () {
+gulp.task('annotate', ['tsc'], function(){
+  return gulp.src(path.join(config.dir.build, config.file.compiled))
+    .pipe($.ngAnnotate())
+    .pipe($.rename(config.file.annotated))
+    .pipe(gulp.dest(path.join(config.dir.build)));
+});
+
+gulp.task('concat', ['annotate', 'copy:lib'], function () {
   return gulp.src(config.libs.map(function (lib) {
     return path.join(config.dir.build_libs, lib);
-  }).concat(path.join(config.dir.build, config.file.compiled)))
+  }).concat(path.join(config.dir.build, config.file.annotated)))
     .pipe($.concat(config.file.concatenated))
     .pipe(gulp.dest(config.dir.build));
 });

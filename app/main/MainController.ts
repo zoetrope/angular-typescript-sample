@@ -3,24 +3,24 @@
 
 'use strict';
 
-module app.controller {
-    export interface MainScope extends ng.IScope {
-        content: string;
-        items: app.models.Item[];
-        add(item:string): void;
-    }
-    export class MainController {
+module main {
+  export interface MainScope extends ng.IScope {
+    content: string;
+    items: Item[];
+    add(item:string): void;
+  }
+  export class MainController {
 
-        constructor(private $scope:MainScope) {
-            $scope.items = [];
-            $scope.add = function (item:string):void {
-                $scope.items.push(new app.models.Item(item));
-            }
-        }
+    constructor(private $scope:MainScope) {
+      $scope.items = [];
+      $scope.add = function (item:string):void {
+        $scope.items.push(new Item(item));
+      }
     }
+  }
 }
 
-angular.module('app.controller').controller("MainController", ["$scope",
-    ($scope:app.controller.MainScope):app.controller.MainController => {
-        return new app.controller.MainController($scope)
-    }]);
+angular.module('app').controller("MainController",
+  ($scope:main.MainScope):main.MainController => {
+    return new main.MainController($scope)
+  });
