@@ -25,9 +25,13 @@ var config = {
   libs: [
     'jquery.js',
     'angular.js',
-    'angular-route.js',
-    'angular-resource.js'
-  ]
+    'angular-resource.js',
+    'angular-sanitize.js',
+    'angular-ui-router.js',
+    'bootstrap.js',
+    'ui-bootstrap-tpls.js'
+  ],
+  moduleName: 'app'
 };
 
 gulp.task('clean', function (callback) {
@@ -39,15 +43,32 @@ gulp.task('copy:ts', [], function () {
     .pipe(gulp.dest(config.dir.build));
 });
 
+gulp.task('copy:font', [], function () {
+  return gulp.src('./bower_components/bootstrap/dist/fonts/*', {base: './bower_components/bootstrap/dist/'})
+    .pipe(gulp.dest(config.dir.public));
+});
+
+gulp.task('copy:css', [], function () {
+  return gulp.src(
+    [
+      './bower_components/bootstrap/dist/css/bootstrap.css',
+      './bower_components/bootstrap/dist/css/bootstrap-theme.css'
+    ],
+    {base: './bower_components/bootstrap/dist/'})
+    .pipe(gulp.dest(config.dir.public));
+});
+
 gulp.task('copy:view', [], function () {
   return gulp.src(path.join(config.dir.app, 'index.html'))
     .pipe(gulp.dest(config.dir.public));
 });
 
+gulp.task('copy:static-file', ['copy:font', 'copy:css', 'copy:view']);
+
 gulp.task('template-cache', function () {
   return gulp.src([path.join(config.dir.app, '**/*.html'), '!' + path.join(config.dir.app, 'index.html')])
     .pipe($.angularTemplatecache({
-      module: 'app'
+      module: config.moduleName
     }))
     .pipe($.rename(config.file.template))
     .pipe(gulp.dest(config.dir.build));
@@ -106,6 +127,7 @@ gulp.task('uglify', ['concat'], function () {
 });
 
 gulp.task('watch', [], function () {
+  gulp.watch(path.join(config.dir.public, 'index.html'), ['copy:view']);
   gulp.watch([
       path.join(config.dir.app, '**/*.ts'),
       path.join(config.dir.app, '**/*.html')
@@ -130,8 +152,8 @@ gulp.task('deploy:rel', ['uglify'], function () {
     .pipe(gulp.dest(config.dir.public));
 });
 
-gulp.task('build:dev', ['copy:view', 'deploy:dev']);
-gulp.task('build:rel', ['copy:view', 'deploy:rel']);
+gulp.task('build:dev', ['copy:static-file', 'deploy:dev']);
+gulp.task('build:rel', ['copy:static-file', 'deploy:rel']);
 
 gulp.task('init', ['tsd', 'bower']);
 

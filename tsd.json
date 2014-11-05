@@ -16,6 +16,18 @@
     },
     "angularjs/angular-route.d.ts": {
       "commit": "5e8ac2341f100202415ff39d8f79875b439ac677"
+    },
+    "angularjs/angular-sanitize.d.ts": {
+      "commit": "b36ee6a691c2e3c5c3fd0b868f9d764740093db2"
+    },
+    "angular-ui-bootstrap/angular-ui-bootstrap.d.ts": {
+      "commit": "b36ee6a691c2e3c5c3fd0b868f9d764740093db2"
+    },
+    "angular-ui/angular-ui-router.d.ts": {
+      "commit": "b36ee6a691c2e3c5c3fd0b868f9d764740093db2"
+    },
+    "bootstrap/bootstrap.d.ts": {
+      "commit": "b36ee6a691c2e3c5c3fd0b868f9d764740093db2"
     }
   }
 }

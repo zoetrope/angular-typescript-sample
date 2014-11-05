@@ -1,14 +1,18 @@
 /// <reference path="../typings/angularjs/angular.d.ts" />
-/// <reference path="../typings/angularjs/angular-route.d.ts" />
+/// <reference path="../typings/angular-ui/angular-ui-router.d.ts" />
 'use strict';
 
 angular.module('app', [
-  'ngRoute'
+  'ui.router',
+  'ui.bootstrap'
 ]);
 
 angular.module('app')
-  .config(function routes($routeProvider:ng.route.IRouteProvider) {
-    $routeProvider.when('/', {templateUrl: 'main/main.html'});
-    $routeProvider.otherwise({redirectTo: '/'});
+  .config(function ($stateProvider:ng.ui.IStateProvider, $urlRouterProvider: ng.ui.IUrlRouterProvider) {
+    $stateProvider.state('main', {
+      url: '/',
+      templateUrl: 'main/main.html'
+    });
+    $urlRouterProvider.otherwise('/');
   }
 );

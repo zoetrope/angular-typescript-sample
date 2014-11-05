@@ -13,25 +13,18 @@
     "node_modules",
     "bower_components"
   ],
-  "dependencies": {},
-  "exportsOverride": {
-    "angular": {
-      "scripts/libs": "**/angular.js"
-    },
-    "angular-resource": {
-      "scripts/libs": "**/angular-resource.js"
-    },
-    "angular-route": {
-      "scripts/libs": "angular-route.js"
-    },
-    "jquery": {
-      "scripts/libs": "**/jquery.js"
-    }
-  },
   "dependencies": {
     "angular": "~1.3.1",
     "angular-resource": "~1.3.1",
-    "angular-route": "~1.3.1",
-    "jquery": "~2.1.1"
+    "jquery": "~2.1.1",
+    "bootstrap": "~3.3.0",
+    "angular-ui-router": "~0.2.11",
+    "angular-bootstrap": "~0.11.2",
+    "angular-sanitize": "~1.3.1"
+  },
+  "overrides": {
+    "bootstrap": {
+      "main": "dist/js/bootstrap.js"
+    }
   }
 }
