@@ -15,6 +15,7 @@ var config = {
     public: 'public'
   },
   file: {
+    template: 'template.js',
     compiled: 'app-compiled.js',
     annotated: 'app-annotated.js',
     concatenated: 'app-concatenated.js',
@@ -39,8 +40,17 @@ gulp.task('copy:ts', [], function () {
 });
 
 gulp.task('copy:view', [], function () {
-  return gulp.src(path.join(config.dir.app, '**/*.html'))
+  return gulp.src(path.join(config.dir.app, 'index.html'))
     .pipe(gulp.dest(config.dir.public));
+});
+
+gulp.task('template-cache', function () {
+  return gulp.src([path.join(config.dir.app, '**/*.html'), '!' + path.join(config.dir.app, 'index.html')])
+    .pipe($.angularTemplatecache({
+      module: 'app'
+    }))
+    .pipe($.rename(config.file.template))
+    .pipe(gulp.dest(config.dir.build));
 });
 
 gulp.task('tsc', ['copy:ts'], function () {
@@ -72,17 +82,18 @@ gulp.task('copy:lib', function () {
     .pipe(gulp.dest(config.dir.build_libs));
 });
 
-gulp.task('annotate', ['tsc'], function(){
+gulp.task('annotate', ['tsc'], function () {
   return gulp.src(path.join(config.dir.build, config.file.compiled))
     .pipe($.ngAnnotate())
     .pipe($.rename(config.file.annotated))
     .pipe(gulp.dest(path.join(config.dir.build)));
 });
 
-gulp.task('concat', ['annotate', 'copy:lib'], function () {
+gulp.task('concat', ['annotate', 'template-cache', 'copy:lib'], function () {
   return gulp.src(config.libs.map(function (lib) {
     return path.join(config.dir.build_libs, lib);
-  }).concat(path.join(config.dir.build, config.file.annotated)))
+  }).concat(path.join(config.dir.build, config.file.annotated))
+    .concat(path.join(config.dir.build, config.file.template)))
     .pipe($.concat(config.file.concatenated))
     .pipe(gulp.dest(config.dir.build));
 });
@@ -95,8 +106,11 @@ gulp.task('uglify', ['concat'], function () {
 });
 
 gulp.task('watch', [], function () {
-  gulp.watch(path.join(config.dir.app, '**/*.ts'), ['deploy:dev']);
-  gulp.watch(path.join(config.dir.app, '**/*.html'), ['copy:view']);
+  gulp.watch([
+      path.join(config.dir.app, '**/*.ts'),
+      path.join(config.dir.app, '**/*.html')
+    ],
+    ['deploy:dev']);
 });
 
 gulp.task('serve', ['watch'], function () {
