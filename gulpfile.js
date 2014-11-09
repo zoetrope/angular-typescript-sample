@@ -17,12 +17,11 @@ var config = {
   },
   files: {
     template: 'template.js',
+    libraries: 'lib.js',
     compiled: 'app-compiled.js',
-    annotated: 'app-annotated.js',
-    concatenated: 'app-concatenated.js',
-    compressed: 'app-compressed.js',
     deployed: 'app.js'
   },
+  // 依存ライブラリを依存順に並べる
   libraries: [
     'jquery.js',
     'angular.js',
@@ -39,52 +38,6 @@ gulp.task('clean', function (callback) {
   del([config.paths.build, config.paths.public], callback);
 });
 
-gulp.task('copy:ts', [], function () {
-  return gulp.src(path.join(config.paths.app, '**/*.ts'))
-    .pipe(gulp.dest(config.paths.build));
-});
-
-gulp.task('copy:font', [], function () {
-  return gulp.src('./bower_components/bootstrap/dist/fonts/*', {base: './bower_components/bootstrap/dist/'})
-    .pipe(gulp.dest(config.paths.public));
-});
-
-gulp.task('copy:css', [], function () {
-  return gulp.src(
-    [
-      './bower_components/bootstrap/dist/css/bootstrap.css',
-      './bower_components/bootstrap/dist/css/bootstrap-theme.css'
-    ],
-    {base: './bower_components/bootstrap/dist/'})
-    .pipe(gulp.dest(config.paths.public));
-});
-
-gulp.task('copy:view', [], function () {
-  return gulp.src(path.join(config.paths.app, 'index.html'))
-    .pipe(gulp.dest(config.paths.public));
-});
-
-gulp.task('copy:static-file', ['copy:font', 'copy:css', 'copy:view']);
-
-gulp.task('template-cache', function () {
-  return gulp.src([path.join(config.paths.app, '**/*.html'), '!' + path.join(config.paths.app, 'index.html')])
-    .pipe($.angularTemplatecache({
-      module: config.moduleName
-    }))
-    .pipe($.rename(config.files.template))
-    .pipe(gulp.dest(config.paths.build));
-});
-
-gulp.task('tsc', ['copy:ts'], function () {
-  return gulp.src(path.join(config.paths.build, '**/*.ts'))
-    .pipe($.plumber())
-    .pipe($.tsc({
-      out: config.files.compiled,
-      target: 'ES5'
-    }))
-    .pipe(gulp.dest(config.paths.build));
-});
-
 gulp.task('bower', function (callback) {
   bower.commands.install()
     .on('end', function () {
@@ -99,58 +52,101 @@ gulp.task('tsd', function (callback) {
   }, callback);
 });
 
+gulp.task('copy:ts', [], function () {
+  return gulp.src(path.join(config.paths.app, '**/*.ts'))
+    .pipe(gulp.dest(config.paths.build));
+});
+
+gulp.task('deploy:font', [], function () {
+  return gulp.src('./bower_components/bootstrap/dist/fonts/*', {base: './bower_components/bootstrap/dist/'})
+    .pipe(gulp.dest(config.paths.public));
+});
+
+gulp.task('deploy:css', [], function () {
+  return gulp.src(
+    [
+      './bower_components/bootstrap/dist/css/bootstrap.css',
+      './bower_components/bootstrap/dist/css/bootstrap-theme.css'
+    ],
+    {base: './bower_components/bootstrap/dist/'})
+    .pipe(gulp.dest(config.paths.public));
+});
+
+gulp.task('deploy:index', [], function () {
+  return gulp.src(path.join(config.paths.app, 'index.html'))
+    .pipe(gulp.dest(config.paths.public));
+});
+
+gulp.task('deploy:static-file', ['deploy:font', 'deploy:css', 'deploy:index']);
+
+gulp.task('deploy:template', function () {
+  return gulp.src([path.join(config.paths.app, '**/*.html'), '!' + path.join(config.paths.app, 'index.html')])
+    .pipe($.angularTemplatecache({
+      module: config.moduleName
+    }))
+    .pipe($.rename(config.files.template))
+    .pipe(gulp.dest(config.paths.public));
+});
+
+gulp.task('tsc', ['copy:ts'], function () {
+  return gulp.src(path.join(config.paths.build, '**/*.ts'))
+    .pipe($.plumber())
+    .pipe($.tsc({
+      out: config.files.compiled,
+      target: 'ES5',
+      noImplicitAny: true,
+      sourcemap: true,
+      sourceRoot: './',
+      mapRoot: ''
+    }))
+    .pipe(gulp.dest(config.paths.build));
+});
+
+gulp.task('deploy:ts', [], function () {
+  return gulp.src(path.join(config.paths.app, '**/*.ts'))
+    .pipe(gulp.dest(config.paths.public));
+});
+
+gulp.task('deploy:app', ['tsc'], function () {
+  return gulp.src(path.join(config.paths.build, config.files.compiled))
+    .pipe($.sourcemaps.init({loadMaps: true}))
+    .pipe($.ngAnnotate({
+      sourcemap: true,
+      sourceroot: './',
+      remove: true,
+      add: true
+    }))
+    .pipe($.if(gulp.env.production, $.uglify()))
+    .pipe($.rename(config.files.deployed))
+    .pipe($.sourcemaps.write('.'))
+    .pipe(gulp.dest(config.paths.public));
+});
+
 gulp.task('copy:lib', function () {
   return gulp.src($.mainBowerFiles())
     .pipe(gulp.dest(config.paths.build_libs));
 });
 
-gulp.task('annotate', ['tsc'], function () {
-  return gulp.src(path.join(config.paths.build, config.files.compiled))
-    .pipe($.ngAnnotate())
-    .pipe($.rename(config.files.annotated))
-    .pipe(gulp.dest(path.join(config.paths.build)));
+gulp.task('deploy:lib', ['copy:lib'], function () {
+  return gulp.src(
+    config.libraries.map(function (lib) { return path.join(config.paths.build_libs, lib); })
+  )
+    .pipe($.concat(config.files.libraries))
+    .pipe($.if(gulp.env.production, $.uglify()))
+    .pipe(gulp.dest(config.paths.public));
 });
 
-gulp.task('concat', ['annotate', 'template-cache', 'copy:lib'], function () {
-  return gulp.src(config.libraries.map(function (lib) {
-    return path.join(config.paths.build_libs, lib);
-  }).concat(path.join(config.paths.build, config.files.annotated))
-    .concat(path.join(config.paths.build, config.files.template)))
-    .pipe($.concat(config.files.concatenated))
-    .pipe(gulp.dest(config.paths.build));
-});
-
-gulp.task('uglify', ['concat'], function () {
-  return gulp.src(path.join(config.paths.build, config.files.concatenated))
-    .pipe($.uglify())
-    .pipe($.rename(config.files.compressed))
-    .pipe(gulp.dest(config.paths.build));
-});
+gulp.task('deploy', ['deploy:static-file', 'deploy:template', 'deploy:ts', 'deploy:app','deploy:lib']);
 
 gulp.task('watch', [], function () {
-  gulp.watch(path.join(config.paths.public, 'index.html'), ['copy:view']);
-  gulp.watch([
-      path.join(config.paths.app, '**/*.ts'),
-      path.join(config.paths.app, '**/*.html')
-    ],
-    ['deploy:dev']);
+  gulp.watch(path.join(config.paths.public, 'index.html'), ['deploy:index']);
+  gulp.watch(path.join(config.paths.app, '**/*.html'), ['deploy:template']);
+  gulp.watch(path.join(config.paths.app, '**/*.ts'), ['deploy:ts', 'deploy:app']);
 });
 
 gulp.task('serve', ['watch'], function () {
   return gulp.src(config.paths.public)
     .pipe($.webserver());
-});
-
-gulp.task('deploy:dev', ['concat'], function () {
-  return gulp.src(path.join(config.paths.build, config.files.concatenated))
-    .pipe($.rename(config.files.deployed))
-    .pipe(gulp.dest(config.paths.public));
-});
-
-gulp.task('deploy:rel', ['uglify'], function () {
-  return gulp.src(path.join(config.paths.build, config.files.compressed))
-    .pipe($.rename(config.files.deployed))
-    .pipe(gulp.dest(config.paths.public));
 });
 
 gulp.task('unittest', function (callback) {
@@ -174,9 +170,6 @@ gulp.task('e2etest', function (callback) {
     }).on('end', callback);
 });
 
-gulp.task('build:dev', ['copy:static-file', 'deploy:dev']);
-gulp.task('build:rel', ['copy:static-file', 'deploy:rel']);
-
 gulp.task('init', ['tsd', 'bower']);
 
-gulp.task('default', ['build:dev']);
+gulp.task('default', ['deploy']);
